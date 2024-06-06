@@ -5,7 +5,7 @@ from ultralytics import YOLO
 model = YOLO('yolov8x')
 
 # Saving the results
-result = model.predict('input_data/08fd33_4.mp4', save = True)
+result = model.predict('MODEL_PATH_HERE', save = True) # Put your model path here
 
 # Printing the results
 print(result[0])
