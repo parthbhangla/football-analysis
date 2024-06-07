@@ -160,7 +160,6 @@ class Tracker:
 
         return frame # Frame with the triangle drawn
 
-
     # Drawing the annotations on the frames
     def drawing_annotations(self, video_frames, tracks):
         
@@ -174,7 +173,8 @@ class Tracker:
 
             # Drawing the annotations for players
             for track_id, player in player_dict.items():
-                frame = self.draw_ellipse(frame, player['bbox'], (0,0,255), track_id)
+                color = player.get('team_color', (0,0,255))
+                frame = self.draw_ellipse(frame, player['bbox'], color, track_id)
 
             # Drawing the annotations for referees
             for _ , referee in referee_dict.items():
