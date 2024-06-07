@@ -7,6 +7,7 @@ import cv2
 import sys
 from utilities import get_centre_of_bbox, get_width_of_bbox
 import numpy as np
+import pandas as pd
 sys.path.append('../')
 
 class Tracker:
@@ -16,6 +17,22 @@ class Tracker:
         self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
     
+    # Interpolating The Ball For Frames It Is Not Detected
+    def interpolate_ball_position(self, ball_positions):
+
+        ball_positions = [x.get(1,{}).get('bbox',[]) for x in ball_positions]
+        df_ball_positions = pd.DataFrame(ball_positions, columns = ['x1','y1','x2','y2'])
+
+        # Interpolating the missing ball positions
+        df_ball_positions = df_ball_positions.interpolate()
+
+        # Edge case where the first frame is missing by backfilling
+        df_ball_positions = df_ball_positions.bfill()
+
+        ball_positions = [{1 : {'bbox' : x}}for x in df_ball_positions.to_numpy().tolist()]
+
+        return ball_positions
+
     # Predicting for each frame
     def detect_frames(self, frames):
 
