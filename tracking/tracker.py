@@ -177,8 +177,31 @@ class Tracker:
 
         return frame # Frame with the triangle drawn
 
+    # Drawing the team ball control percentage on the frames
+    def draw_team_ball_control(self, frame, frame_num, team_ball_control):
+
+        # Drawing a semi-transparent rectangle to represent this
+        overlay = frame.copy()
+        cv2.rectangle(overlay, (1350, 850), (1900, 970), (255, 255, 255), cv2.FILLED)
+        alpha = 0.4
+        cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
+
+        # Calculating ball possession percentage
+        team_ball_control_till_frame = team_ball_control[ : frame_num + 1]
+        team_1 = team_ball_control_till_frame[team_ball_control_till_frame == 1].shape[0]
+        team_2 = team_ball_control_till_frame[team_ball_control_till_frame == 2].shape[0]
+
+        team_1_percentage = (team_1 / (team_1 + team_2)) * 100
+        team_2_percentage = (team_2 / (team_1 + team_2)) * 100
+
+        # Drawing the text on the frames
+        cv2.putText(frame, f'Team 1 Ball Possesion: {team_1_percentage:.2f}%', (1400, 900), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), thickness = 3)
+        cv2.putText(frame, f'Team 2 Ball Possesion: {team_2_percentage:.2f}%', (1400, 950), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), thickness = 3)
+
+        return frame # Frame with the team ball control drawn
+    
     # Drawing the annotations on the frames
-    def drawing_annotations(self, video_frames, tracks):
+    def drawing_annotations(self, video_frames, tracks, team_ball_control):
         
         output_video_frames =[]
         for frame_num, frame in enumerate(video_frames):
@@ -204,6 +227,9 @@ class Tracker:
             # Drawing the annotations for the ball
             for track_id, ball in ball_dict.items():
                 frame = self.draw_triangle(frame, ball['bbox'], (0,255,0))
+            
+            # Drawing the team ball control percentage
+            frame = self.draw_team_ball_control(frame, frame_num, team_ball_control)
             
             output_video_frames.append(frame)
 

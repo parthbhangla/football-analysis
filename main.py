@@ -3,6 +3,7 @@ from utilities import read_video, save_video
 from tracking import Tracker
 from team_assignment import TeamAssigner
 from player_ball_assignment import PlayerBallAssigner
+import numpy as np
 
 def main():
     # Reading Video
@@ -30,6 +31,10 @@ def main():
 
     # Assign Ball Acqusition
     player_assigner = PlayerBallAssigner()
+
+    # Tracking Ball Control Percntage
+    team_ball_control = [] 
+
     for frame_num, player_track in enumerate(tracks['players']):
         ball_bbox = tracks['ball'][frame_num][1]['bbox']
         assigned_player = player_assigner.assign_ball_to_player(player_track, ball_bbox)
@@ -37,9 +42,15 @@ def main():
         # If a player is assigned to the ball
         if assigned_player != -1:
             tracks['players'][frame_num][assigned_player]['has_ball'] = True # New Parameter in the dictionary
+            team_ball_control.append(tracks['players'][frame_num][assigned_player]['team']) # Adding the team to the possesion list
+        else:
+            team_ball_control.append(team_ball_control[-1]) # If no player is assigned to the ball, the previous team is assigned
+
+    team_ball_control = np.array(team_ball_control)
+        
 
     # Drawing annotations on the video
-    output_video_frames = tracker.drawing_annotations(video_frames, tracks)
+    output_video_frames = tracker.drawing_annotations(video_frames, tracks, team_ball_control)
 
     # Saving The Video
     save_video(output_video_frames, 'output_data/output_video.avi')
