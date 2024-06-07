@@ -6,6 +6,7 @@ import os
 import cv2
 import sys
 from utilities import get_centre_of_bbox, get_width_of_bbox
+import numpy as np
 sys.path.append('../')
 
 class Tracker:
@@ -144,6 +145,20 @@ class Tracker:
             )
 
         return frame # Frame with the ellipse drawn
+    
+    # Drawing triangle for the ball on each frame to track it
+    def draw_triangle(self, frame, bbox, color):
+        y = int(bbox[1]) # Triangle is on the top of the ball
+        x , _ = get_centre_of_bbox(bbox) # Centre of the ball
+        triangle_points = np.array([
+            [x,y],
+            [x-10,y-20],
+            [x+10,y-20]
+        ])
+        cv2.drawContours(frame, [triangle_points], 0, color, cv2.FILLED)
+        cv2.drawContours(frame, [triangle_points], 0, (0,0,0), 2)
+
+        return frame # Frame with the triangle drawn
 
 
     # Drawing the annotations on the frames
@@ -163,7 +178,11 @@ class Tracker:
 
             # Drawing the annotations for referees
             for _ , referee in referee_dict.items():
-                frame = self.draw_ellipse(frame, referee['bbox'], (255,0,0), track_id=None)
+                frame = self.draw_ellipse(frame, referee['bbox'], (0,255,255), track_id=None)
+
+            # Drawing the annotations for the ball
+            for track_id, ball in ball_dict.items():
+                frame = self.draw_triangle(frame, ball['bbox'], (0,255,0))
             
             output_video_frames.append(frame)
 
