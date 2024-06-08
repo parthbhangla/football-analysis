@@ -80,7 +80,7 @@ class TeamAssigner:
 
         # Goalkeeper correction
         if player_id == 107:
-            team_id = 2
+            team_id = 1
             
         # Storing this for later
         self.player_team_dict[player_id] = team_id
