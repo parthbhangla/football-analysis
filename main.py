@@ -5,6 +5,7 @@ from team_assignment import TeamAssigner
 from player_ball_assignment import PlayerBallAssigner
 import numpy as np
 from camera_movement import CameraMovementEstimator
+from view_transform import ViewTransformer
 
 def main():
     # Reading Video
@@ -23,6 +24,10 @@ def main():
     camera_movement_estimator = CameraMovementEstimator(video_frames[0])
     camera_movement_per_frame = camera_movement_estimator.get_camera_movement(video_frames, read_from_stub=True, stub_path='stubs/camera_movement_stub.pkl')
     camera_movement_estimator.adjust_tracking_positions(tracks, camera_movement_per_frame)    
+
+    # Transforming the view
+    view_transformer = ViewTransformer()
+    view_transformer.add_transformed_position_to_tracks(tracks)
 
     # Interpolate Ball Positions
     tracks['ball'] = tracker.interpolate_ball_position(tracks['ball'])
