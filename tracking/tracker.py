@@ -5,7 +5,7 @@ import pickle
 import os
 import cv2
 import sys
-from utilities import get_centre_of_bbox, get_width_of_bbox
+from utilities import get_centre_of_bbox, get_width_of_bbox, get_foot_position
 import numpy as np
 import pandas as pd
 sys.path.append('../')
@@ -17,6 +17,20 @@ class Tracker:
         self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
     
+    # Adding the player position to the track
+    def add_position_to_track(self, tracks):
+        for object, object_tracks in tracks.items():
+            for frame_num, track in enumerate(object_tracks):
+                for track_id, track_info in track.items():
+                    bbox = track_info.get('bbox', [])
+                    if object == 'ball':
+                        position = get_centre_of_bbox(bbox)
+                    else:
+                        position = get_foot_position(bbox)
+                    tracks[object][frame_num][track_id]['position'] = position
+
+        return tracks
+
     # Interpolating The Ball For Frames It Is Not Detected
     def interpolate_ball_position(self, ball_positions):
 
@@ -182,7 +196,7 @@ class Tracker:
 
         # Drawing a semi-transparent rectangle to represent this
         overlay = frame.copy()
-        cv2.rectangle(overlay, (1350, 850), (1900, 970), (255, 255, 255), cv2.FILLED)
+        cv2.rectangle(overlay, (1385, 870), (1920, 960), (255, 255, 255), cv2.FILLED)
         alpha = 0.4
         cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
 
